@@ -1,4 +1,5 @@
 import express from 'express';
+import { searchFlight } from './duffel/searchFlights.js';
 
 const app = express();
 
