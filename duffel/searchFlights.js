@@ -12,7 +12,7 @@ const getPassengers = (num) => {
   return passengers;
 };
 
-export const searchFlight = async (
+const searchFlightWithSingleDestination = async (
   origin,
   destination,
   numPassengers,
@@ -25,11 +25,11 @@ export const searchFlight = async (
     slices: [
       {
         origin,
-        destination,
+        destination: '00AK',
         departure_date,
       },
       {
-        origin: destination,
+        origin: '00AK',
         destination: origin,
         departure_date: return_date,
       },
@@ -46,4 +46,25 @@ export const searchFlight = async (
   });
 
   return results.data;
+};
+
+export const searchFlights = async (
+  origin,
+  destinations,
+  numPassengers,
+  departure_date,
+  return_date
+) => {
+  const flights = [];
+
+  for (let i = 0; i < destinations.length; ++i) {
+    const dest = destinations[i];
+    const results = await searchFlightWithSingleDestination(
+      origin,
+      dest,
+      numPassengers,
+      departure_date,
+      return_date
+    );
+  }
 };
