@@ -25,11 +25,11 @@ const searchFlightWithSingleDestination = async (
     slices: [
       {
         origin,
-        destination: '00AK',
+        destination,
         departure_date,
       },
       {
-        origin: '00AK',
+        origin: destination,
         destination: origin,
         departure_date: return_date,
       },
@@ -43,6 +43,7 @@ const searchFlightWithSingleDestination = async (
   const results = await duffel.offers.list({
     offer_request_id: id,
     sort: 'total_amount',
+    limit: 5,
   });
 
   return results.data;
@@ -55,16 +56,35 @@ export const searchFlights = async (
   departure_date,
   return_date
 ) => {
-  const flights = [];
+  let flights = [];
 
   for (let i = 0; i < destinations.length; ++i) {
-    const dest = destinations[i];
+    const destination = destinations[i];
     const results = await searchFlightWithSingleDestination(
       origin,
-      dest,
+      destination,
       numPassengers,
       departure_date,
       return_date
     );
+    flights.push(results);
   }
+
+  const flightsSortedByPrice = flights
+    .flat()
+    .sort((a, b) =>
+      parseFloat(a.total_amount) > parseFloat(b.total_amount) ? 1 : -1
+    );
+
+  return flightsSortedByPrice.map(({ total_amount, slices, owner }) => {
+    const airline = owner.name;
+    const destinationCity = slices[0].destination.city_name;
+    const destinationAirport = slices[0].destination.iata_code;
+    return {
+      total_amount,
+      airline,
+      destinationCity,
+      destinationAirport,
+    };
+  });
 };
